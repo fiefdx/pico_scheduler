@@ -68,8 +68,9 @@ class Task(object):
 
 
 class Scheluder(object):
-    def __init__(self, log_to = None, name = "scheduler"):
+    def __init__(self, log_to = None, name = "scheduler", cpu = 0):
         self.log_to = log_to
+        self.cpu = cpu
         self.name = name
         self.tasks = []
         self.tasks_ids = {}
@@ -78,9 +79,10 @@ class Scheluder(object):
         self.sleep_ms = 0
         self.load_calc_at = ticks_ms()
         self.idle = 0
-        self.idle_sleep_interval = 10
-        self.task_sleep_interval = 1
+        self.idle_sleep_interval = 0.1
+        self.task_sleep_interval = 0.1
         self.need_to_sort = True
+        self.stop = False
         
     def task_sort(self, task):
         if task.condition.wait_msg:
@@ -118,7 +120,7 @@ class Scheluder(object):
             print(content)
 
     def run(self):
-        while True:
+        while not self.stop:
             try:
                 load_interval = ticks_diff(ticks_ms(), self.load_calc_at)
                 if load_interval >= 1000:
