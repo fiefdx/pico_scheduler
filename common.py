@@ -1,7 +1,17 @@
 import os
 import time
-import supervisor
-import adafruit_hashlib as hashlib
+platform = "circuitpython"
+supervisor = None
+try:
+    import supervisor
+except:
+    platform = "micropython"
+    print("micropython, no supervisor module exists, use time.ticks_ms instead")
+hashlib = None
+try:
+    import adafruit_hashlib as hashlib
+except:
+    import hashlib
 
 BUF_SIZE = 65536
 _TICKS_PERIOD = const(1<<29)
@@ -10,7 +20,10 @@ _TICKS_HALFPERIOD = const(_TICKS_PERIOD//2)
 
 
 def ticks_ms():
-    return supervisor.ticks_ms()
+    if supervisor:
+        return supervisor.ticks_ms()
+    else:
+        return time.ticks_ms()
 
 
 def sleep_ms(t):
@@ -36,16 +49,23 @@ def ticks_less(ticks1, ticks2):
 
 def sha1sum(content):
     #'''param content must be unicode, result is string'''
-    m = hashlib.sha1(content.encode("utf-8"))
-    m.digest()
-    result = m.hexdigest()
+    if platform == "circuitpython":
+        m = hashlib.sha1(content.encode("utf-8"))
+        m.digest()
+        result = m.hexdigest()
+    else:
+        m = hashlib.sha1(content.encode("utf-8"))
+        result = m.digest().hex()
     return result
 
 
 def md5twice(content):
     #'''param content must be unicode, result is string'''
-    m = hashlib.md5(content.encode("utf-8")).hexdigest()
-    result = hashlib.md5(m).hexdigest()
+    if platform == "circuitpython":
+        m = hashlib.md5(content.encode("utf-8")).hexdigest()
+        result = hashlib.md5(m).hexdigest()
+    else:
+        result = None
     return result
 
 
