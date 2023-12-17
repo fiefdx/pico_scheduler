@@ -1,10 +1,14 @@
 import os
 import gc
 machine = None
+microcontroller = None
 try:
     import machine
 except:
-    print("no machine module support")
+    try:
+        import microcontroller
+    except:
+        print("no machine & microcontroller module support")
 thread = None
 try:
     import _thread as thread
@@ -12,15 +16,19 @@ except:
     print("no multi-threading module support")
 
 from scheduler import Scheluder, Condition, Task, Message
-from common import path_join, ticks_ms, ticks_add, ticks_diff, sleep_ms, sha1sum
+from common import ticks_ms, ticks_add, ticks_diff, sleep_ms
 
 if machine:
     machine.freq(200000000)
     print("freq: %s mhz" % (machine.freq() / 1000000))
+if microcontroller:
+    microcontroller.cpu.frequency = 200000000
+    print("freq: %s mhz" % (microcontroller.cpu.frequency / 1000000))
 
 def monitor(task, name, scheduler = None, display_id = None):
     while True:
         gc.collect()
+        print(int(100 - (gc.mem_free() * 100 / (264 * 1024))), gc.mem_free())
         monitor_msg = "CPU%s:%3d%%  RAM:%3d%%" % (scheduler.cpu, int(100 - scheduler.idle), int(100 - (scheduler.mem_free() * 100 / (264 * 1024))))
         yield Condition(sleep = 2000, send_msgs = [Message({"msg": monitor_msg}, receiver = display_id)])
 
@@ -49,6 +57,8 @@ def core1_thread(scheduler):
 
 
 if __name__ == "__main__":
+    print(int(100 - (gc.mem_free() * 100 / (264 * 1024))), gc.mem_free())
+    ss = gc.mem_free()
     s1 = None
     if thread:
         s1 = Scheluder(cpu = 1)
@@ -61,7 +71,8 @@ if __name__ == "__main__":
         s = Scheluder(cpu = 0)
         display_id = s.add_task(Task(display, "display"))
         monitor_id = s.add_task(Task(monitor, "monitor", kwargs = {"scheduler": s, "display_id": display_id}))
-        counter_id = s.add_task(Task(counter, "counter", kwargs = {"interval": 10, "display_id": display_id}))
+        #counter_id = s.add_task(Task(counter, "counter", kwargs = {"interval": 10, "display_id": display_id}))
+        print(int(100 - (gc.mem_free() * 100 / (264 * 1024))), gc.mem_free() - ss)
         s.run()
     except Exception as e:
         if s1:
