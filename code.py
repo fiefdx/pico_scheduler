@@ -2,7 +2,7 @@ import os
 import gc
 
 from scheduler import Scheluder, Condition, Task, Message
-from common import path_join, ticks_ms, ticks_add, ticks_diff, sleep_ms
+from common import ticks_ms, ticks_add, ticks_diff, sleep_ms
 
 
 def monitor(task, name, scheduler = None, display_id = None):
