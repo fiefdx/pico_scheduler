@@ -1,6 +1,8 @@
 # Pico Scheduler
 
-A python task scheduler for circuitpython & micropython
+A python task scheduler for circuitpython & micropython,
+
+For more information [my blog](http://blog.doiturself.net/software/2023/12/20/raspberry-pi-pico-scheduler.html)
 
 
 ## Design
